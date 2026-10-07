@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}History – CardioSense AI{% endblock %}
+{% block body %}
+{% set active = 'history' %}
+{% include "_header.html" %}
+<main class="container">
+  <h1 class="page-title">Your previous checks</h1>
+  {% if rows %}
+  <section class="panel">
+    <div class="table-scroll">
+      <table class="history">
+        <thead><tr><th>Date</th><th>Source</th><th>Risk</th><th></th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+          {% set level = {'Low': 'low', 'Moderate': 'moderate', 'Moderate–High': 'modhigh', 'High': 'high'}[r.label] %}
+          <tr>
+            <td>{{ r.created_at[:16] }}</td>
+            <td>{{ 'Manual entry' if r.source == 'manual' else 'Blood report' }}</td>
+            <td><span class="level-text level-{{ level }}">{{ '%.0f' % r.risk }}% {{ r.label }}</span></td>
+            <td><a href="{{ url_for('result', prediction_id=r.id) }}">View</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% else %}
+  <section class="panel">
+    <p>No checks yet.</p>
+    <a href="{{ url_for('check') }}" class="btn btn-primary">Check my risk</a>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

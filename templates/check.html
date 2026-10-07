@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Check your heart – CardioSense AI{% endblock %}
+{% block body %}
+{% set active = 'check' %}
+{% include "_header.html" %}
+<main class="container">
+  <h1 class="page-title">Check your heart health</h1>
+  <p class="muted lead">Enter your details or upload a blood report. You'll get a risk percentage and the main factors behind it.</p>
+
+  <div class="two-col">
+    <form method="post" class="panel form-grid-wrap" novalidate>
+      <h2>Your health details</h2>
+      <div class="form-grid">
+        <label>Age (years)
+          <input type="number" name="age" inputmode="numeric" min="18" max="100" value="{{ values.age|int if values.age else '' }}" required>
+        </label>
+        <label>Gender
+          <select name="gender">
+            <option value="male" {% if values.gender == 'male' %}selected{% endif %}>Male</option>
+            <option value="female" {% if values.gender == 'female' %}selected{% endif %}>Female</option>
+          </select>
+        </label>
+        <label>Height (cm)
+          <input type="number" name="height" inputmode="numeric" min="120" max="220" value="{{ values.height|int if values.height else '' }}" required>
+        </label>
+        <label>Weight (kg)
+          <input type="number" name="weight" inputmode="decimal" step="0.1" min="30" max="200" value="{{ values.weight if values.weight else '' }}" required>
+        </label>
+        <label>Systolic BP (mm Hg)
+          <input type="number" name="systolic" inputmode="numeric" min="80" max="250" placeholder="e.g. 120" value="{{ values.systolic|int if values.systolic else '' }}" required>
+        </label>
+        <label>Diastolic BP (mm Hg)
+          <input type="number" name="diastolic" inputmode="numeric" min="40" max="150" placeholder="e.g. 80" value="{{ values.diastolic|int if values.diastolic else '' }}" required>
+        </label>
+        <label>Cholesterol (mg/dl)
+          <input type="number" name="cholesterol" inputmode="numeric" min="80" max="500" placeholder="e.g. 190" value="{{ values.cholesterol|int if values.cholesterol else '' }}" required>
+        </label>
+        <label>Glucose (mg/dl)
+          <input type="number" name="glucose" inputmode="numeric" min="40" max="500" placeholder="e.g. 95" value="{{ values.glucose|int if values.glucose else '' }}" required>
+        </label>
+        <label>Smoking
+          <select name="smoke">
+            <option value="no">No</option>
+            <option value="yes" {% if values.smoke %}selected{% endif %}>Yes</option>
+          </select>
+        </label>
+        <label>Alcohol
+          <select name="alcohol">
+            <option value="no">No</option>
+            <option value="yes" {% if values.alcohol %}selected{% endif %}>Yes</option>
+          </select>
+        </label>
+        <label>Physical activity
+          <select name="activity">
+            <option value="low" {% if values.activity == 'low' %}selected{% endif %}>Low</option>
+            <option value="moderate" {% if values.activity == 'moderate' %}selected{% endif %}>Moderate</option>
+            <option value="high" {% if values.activity == 'high' %}selected{% endif %}>High</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary btn-wide">Check my risk</button>
+      </div>
+    </form>
+
+    <aside class="side">
+      <section class="panel">
+        <h2>Or upload a blood report</h2>
+        <div class="dropzone is-disabled">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg>
+          <strong>PDF or photo of a lab report</strong>
+          <span class="muted small">Coming in the next step: we read the values (OCR), you check them, then we predict.</span>
+        </div>
+      </section>
+      <section class="panel soft">
+        <h3>How it works</h3>
+        <ol class="steps">
+          <li>Enter details or upload a report</li>
+          <li>Confirm the values</li>
+          <li>Get your heart-risk percentage</li>
+          <li>Download a PDF report (optional)</li>
+        </ol>
+      </section>
+      <p class="muted small">For screening and learning only. Not a medical diagnosis.</p>
+    </aside>
+  </div>
+</main>
+{% endblock %}

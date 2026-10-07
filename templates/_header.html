@@ -1,0 +1,25 @@
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo logo-link" href="{{ url_for('check') }}">
+      <svg width="34" height="31" viewBox="0 0 34 31" aria-hidden="true">
+        <path d="M17 30 C 7 22.5, 1 16.5, 1 9.5 A 7.6 7.6 0 0 1 17 6 A 7.6 7.6 0 0 1 33 9.5 C 33 16.5, 27 22.5, 17 30 Z" fill="#B91C1C"/>
+        <path d="M3.5 15 H11 L13.5 10 L16.5 21 L19.5 12.5 L21.5 15 H30.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>CardioSense <em>AI</em></span>
+    </a>
+    <nav>
+      <a href="{{ url_for('check') }}" class="{% if active == 'check' %}current{% endif %}">Check risk</a>
+      <a href="{{ url_for('history') }}" class="{% if active == 'history' %}current{% endif %}">History</a>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </nav>
+  </div>
+</header>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="container flash-area">
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}

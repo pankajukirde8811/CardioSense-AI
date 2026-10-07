@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Your result – CardioSense AI{% endblock %}
+{% block body %}
+{% set active = 'history' %}
+{% include "_header.html" %}
+{% set level = {'Low': 'low', 'Moderate': 'moderate', 'Moderate–High': 'modhigh', 'High': 'high'}[p.label] %}
+{% set i = p.inputs %}
+<main class="container">
+  <a href="{{ url_for('check') }}" class="back">← New check</a>
+  <h1 class="page-title">Your heart risk result</h1>
+
+  <div class="two-col">
+    <section class="panel result-card">
+      <svg class="gauge" viewBox="0 0 260 150" role="img" aria-label="Risk gauge: {{ p.risk }} percent">
+        <path d="M20 135 A110 110 0 0 1 240 135" fill="none" stroke="#EFE5E5" stroke-width="22" stroke-linecap="round"/>
+        <path d="M20 135 A110 110 0 0 1 240 135" fill="none" class="gauge-fill level-{{ level }}" stroke-width="22" stroke-linecap="round"
+              pathLength="100" stroke-dasharray="{{ p.risk }} 100"/>
+      </svg>
+      <div class="risk-number level-{{ level }}">{{ '%.0f' % p.risk }}%</div>
+      <span class="badge level-{{ level }}">{{ p.label }} risk</span>
+
+      {% if p.flags %}
+      <div class="flags">
+        {% for f in p.flags %}<span class="flag">{{ f }}</span>{% endfor %}
+      </div>
+      {% else %}
+      <p class="muted">No major warning signs in your values.</p>
+      {% endif %}
+
+      <p class="muted small">This is a risk estimate, not a diagnosis. Please follow up with a healthcare professional.</p>
+      <div class="actions center">
+        <button type="button" class="btn btn-primary" disabled title="Coming soon">Download PDF report</button>
+        <a href="{{ url_for('check') }}" class="btn btn-outline">Check again</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Your values</h2>
+      <table class="values">
+        <tr><th>Age</th><td>{{ i.age|int }} years</td></tr>
+        <tr><th>Gender</th><td>{{ i.gender|capitalize }}</td></tr>
+        <tr><th>Blood pressure</th><td>{{ i.systolic|int }} / {{ i.diastolic|int }} mm Hg</td></tr>
+        <tr><th>Cholesterol</th><td>{{ i.cholesterol|int }} mg/dl</td></tr>
+        <tr><th>Glucose</th><td>{{ i.glucose|int }} mg/dl</td></tr>
+        <tr><th>Height / Weight</th><td>{{ i.height|int }} cm / {{ i.weight }} kg</td></tr>
+        <tr><th>BMI</th><td>{{ p.bmi }}</td></tr>
+        <tr><th>Smoking</th><td>{{ 'Yes' if i.smoke else 'No' }}</td></tr>
+        <tr><th>Alcohol</th><td>{{ 'Yes' if i.alcohol else 'No' }}</td></tr>
+        <tr><th>Physical activity</th><td>{{ i.activity|capitalize }}</td></tr>
+      </table>
+      <p class="muted small">Checked on {{ p.created_at[:16] }} (UTC)</p>
+    </section>
+  </div>
+</main>
+{% endblock %}
