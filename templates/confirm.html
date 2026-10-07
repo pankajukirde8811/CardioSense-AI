@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Confirm report values – CardioSense AI{% endblock %}
+{% block body %}
+{% set active = 'check' %}
+{% include "_header.html" %}
+{% macro field(name, label, min, max, step='1', placeholder='') -%}
+  {% set was_found = name in found %}
+  <label class="{{ 'found' if was_found else 'missing' }}">{{ label }}
+    <input type="number" name="{{ name }}" min="{{ min }}" max="{{ max }}" step="{{ step }}"
+           placeholder="{{ placeholder }}" value="{{ values[name] if values[name] is defined and values[name] is not none else '' }}" required>
+    {% if found %}<span class="hint">{{ 'Found in report' if was_found else 'Not in report – please add' }}</span>{% endif %}
+  </label>
+{%- endmacro %}
+<main class="container">
+  <a href="{{ url_for('check') }}" class="back">← Back</a>
+  <h1 class="page-title">Check the values we read</h1>
+  <p class="muted lead">Lab reports look different everywhere. Please check every value and fix anything that's wrong before we predict.</p>
+
+  <form method="post" action="{{ url_for('check') }}" class="panel" novalidate>
+    <input type="hidden" name="source" value="report">
+    <input type="hidden" name="method" value="{{ method }}">
+    {% if found %}
+    <p class="read-summary">We found <strong>{{ found|length }}</strong> value{{ 's' if found|length != 1 }} in your report{% if method == 'ocr' %} using OCR. Photos can be misread, so please double-check{% endif %}.</p>
+    {% endif %}
+
+    <div class="form-grid">
+      {{ field('cholesterol', 'Cholesterol (mg/dl)', 80, 500, placeholder='e.g. 190') }}
+      {{ field('glucose', 'Glucose (mg/dl)', 40, 500, placeholder='e.g. 95') }}
+      {{ field('systolic', 'Systolic BP (mm Hg)', 80, 250, placeholder='e.g. 120') }}
+      {{ field('diastolic', 'Diastolic BP (mm Hg)', 40, 150, placeholder='e.g. 80') }}
+      {{ field('age', 'Age (years)', 18, 100) }}
+      {{ field('height', 'Height (cm)', 120, 220) }}
+      {{ field('weight', 'Weight (kg)', 30, 200, step='0.1') }}
+      <label class="{{ 'found' if 'gender' in found else 'missing' }}">Gender
+        <select name="gender">
+          <option value="male" {% if values.gender == 'male' %}selected{% endif %}>Male</option>
+          <option value="female" {% if values.gender == 'female' %}selected{% endif %}>Female</option>
+        </select>
+        {% if found %}<span class="hint">{{ 'Found in report' if 'gender' in found else 'Please check' }}</span>{% endif %}
+      </label>
+      <label>Smoking
+        <select name="smoke"><option value="no">No</option><option value="yes" {% if values.smoke %}selected{% endif %}>Yes</option></select>
+      </label>
+      <label>Alcohol
+        <select name="alcohol"><option value="no">No</option><option value="yes" {% if values.alcohol %}selected{% endif %}>Yes</option></select>
+      </label>
+      <label>Physical activity
+        <select name="activity">
+          <option value="low" {% if values.activity == 'low' %}selected{% endif %}>Low</option>
+          <option value="moderate" {% if values.activity == 'moderate' %}selected{% endif %}>Moderate</option>
+          <option value="high" {% if values.activity == 'high' %}selected{% endif %}>High</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="confirm-check"><input type="checkbox" name="confirmed" value="1" required> I have checked these values and they are correct</label>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary btn-wide">Confirm &amp; check risk</button>
+      <a href="{{ url_for('check') }}" class="btn btn-outline">Upload a different file</a>
+    </div>
+  </form>
+</main>
+{% endblock %}

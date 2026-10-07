@@ -10,3 +10,4 @@ python-dotenv==1.2.4
 reportlab==5.0.1
 scikit-learn==1.9.1
 shap==0.52.0
+tzdata==2026.5

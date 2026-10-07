@@ -30,6 +30,7 @@
       {% endwith %}
 
       <form method="post" action="{{ url_for(mode) }}" class="form">
+        <input type="hidden" name="tz" id="tz">
         <h1>{{ "Welcome back" if mode == "login" else "Create your account" }}</h1>
 
         <label>Email
@@ -67,6 +68,7 @@
 </div>
 
 <script>
+try { document.getElementById("tz").value = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
 function togglePw(btn) {
   const input = document.getElementById("password");
   const show = input.type === "password";

@@ -27,9 +27,12 @@
       <p class="muted">No major warning signs in your values.</p>
       {% endif %}
 
+      {% if i.age < 30 or i.age > 65 %}
+      <p class="note">This model was trained on adults aged 30–65, so this result is less reliable for age {{ i.age|int }}.</p>
+      {% endif %}
       <p class="muted small">This is a risk estimate, not a diagnosis. Please follow up with a healthcare professional.</p>
       <div class="actions center">
-        <button type="button" class="btn btn-primary" disabled title="Coming soon">Download PDF report</button>
+        <a href="{{ url_for('result_pdf', prediction_id=p.id) }}" class="btn btn-primary">Download PDF report</a>
         <a href="{{ url_for('check') }}" class="btn btn-outline">Check again</a>
       </div>
     </section>
@@ -48,7 +51,7 @@
         <tr><th>Alcohol</th><td>{{ 'Yes' if i.alcohol else 'No' }}</td></tr>
         <tr><th>Physical activity</th><td>{{ i.activity|capitalize }}</td></tr>
       </table>
-      <p class="muted small">Checked on {{ p.created_at[:16] }} (UTC)</p>
+      <p class="muted small">Checked on {{ p.created_at|local_dt }}</p>
     </section>
   </div>
 </main>

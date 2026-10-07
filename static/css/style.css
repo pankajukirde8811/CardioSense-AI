@@ -141,3 +141,15 @@ h1 { font-family: Sora, sans-serif; font-weight: 600; }
   .page-title { font-size: 24px; }
   .btn-wide { width: 100%; }
 }
+.note { margin: 0; padding: 10px 14px; border-radius: 10px; background: #FFF4E5; color: #7C2D12; font-size: 14px; }
+.upload-form { display: flex; flex-direction: column; gap: 12px; }
+.dropzone { cursor: pointer; }
+.dropzone:hover { background: #FFF8F8; }
+.btn-block { width: 100%; height: 46px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.read-summary { margin: 0 0 18px; }
+.form-grid .hint { font-size: 12.5px; font-weight: 400; color: #166534; }
+.form-grid label.missing .hint { color: #9A3412; font-weight: 500; }
+.form-grid label.missing input { border: 2px solid #E8A3A3; }
+.confirm-check { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-weight: 500; }
+.confirm-check input { width: 20px; height: 20px; accent-color: var(--red); }

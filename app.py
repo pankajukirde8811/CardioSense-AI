@@ -2,24 +2,37 @@
 import json
 import os
 import sqlite3
+import uuid
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import (Flask, flash, g, redirect, render_template, request,
-                   session, url_for)
+from flask import (Flask, Response, flash, g, redirect, render_template,
+                   request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from utils.predict import predict_risk
+from utils.ocr import ALLOWED_EXTENSIONS, extract_text, parse_values
+from utils.report import build_report, report_id
+from utils.timefmt import format_dt, is_valid_zone, to_local
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 DB_PATH = BASE_DIR / "cardiosense.db"
+UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = os.environ["SECRET_KEY"]
 app.permanent_session_lifetime = timedelta(days=30)
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB uploads
+
+
+@app.template_filter("local_dt")
+def local_dt(utc_text):
+    """Show a stored UTC time in the user's own timezone."""
+    return format_dt(to_local(utc_text, session.get("tz")))
 
 
 # ---------- Database ----------
@@ -90,6 +103,9 @@ def login():
             session.permanent = bool(request.form.get("remember"))
             session["user_id"] = user["id"]
             session["email"] = user["email"]
+            zone = request.form.get("tz", "")
+            if is_valid_zone(zone):
+                session["tz"] = zone
             return redirect(url_for("check"))
         flash("Wrong email or password.", "error")
     return render_template("login.html", mode="login")
@@ -166,9 +182,15 @@ def check():
     values = {}
     if request.method == "POST":
         values, errors = read_health_form(request.form)
+        source = "report" if request.form.get("source") == "report" else "manual"
+        if source == "report" and not request.form.get("confirmed"):
+            errors.append("Please confirm that you have checked the values.")
         if errors:
             for message in errors:
                 flash(message, "error")
+            if source == "report":
+                return render_template("confirm.html", values=values, found=[],
+                                       method=request.form.get("method", ""))
         else:
             result = predict_risk(
                 age=values["age"], gender=values["gender"],
@@ -182,13 +204,50 @@ def check():
             cursor = db.execute(
                 """INSERT INTO predictions
                    (user_id, source, inputs, risk, label, flags, bmi)
-                   VALUES (?, 'manual', ?, ?, ?, ?, ?)""",
-                (session["user_id"], json.dumps(values), result["risk"],
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (session["user_id"], source, json.dumps(values), result["risk"],
                  result["label"], json.dumps(result["flags"]), result["bmi"]),
             )
             db.commit()
             return redirect(url_for("result", prediction_id=cursor.lastrowid))
     return render_template("check.html", values=values)
+
+
+@app.route("/upload", methods=["POST"])
+@login_required
+def upload():
+    file = request.files.get("report")
+    if not file or not file.filename:
+        flash("Please choose a PDF or photo of your blood report.", "error")
+        return redirect(url_for("check"))
+    extension = Path(file.filename).suffix.lower()
+    if extension not in ALLOWED_EXTENSIONS:
+        flash("Only PDF, PNG, JPG or WEBP files are supported.", "error")
+        return redirect(url_for("check"))
+
+    # Save with a random name, read it, then delete it right away (privacy).
+    temp_path = UPLOAD_DIR / f"{uuid.uuid4().hex}{extension}"
+    file.save(temp_path)
+    try:
+        text, method = extract_text(temp_path)
+    except Exception:
+        app.logger.exception("Could not read report")
+        flash("Sorry, we could not read that file. Try a clearer photo or a PDF.", "error")
+        return redirect(url_for("check"))
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    found = parse_values(text)
+    if not found:
+        flash("We could not find any values in this report. Please enter them by hand.", "error")
+        return redirect(url_for("check"))
+    return render_template("confirm.html", values=found, found=list(found), method=method)
+
+
+@app.errorhandler(413)
+def too_large(_error):
+    flash("That file is too big. The limit is 10 MB.", "error")
+    return redirect(url_for("check"))
 
 
 def load_prediction(prediction_id):
@@ -213,6 +272,20 @@ def result(prediction_id):
         flash("That result was not found.", "error")
         return redirect(url_for("history"))
     return render_template("result.html", p=item)
+
+
+@app.route("/result/<int:prediction_id>/pdf")
+@login_required
+def result_pdf(prediction_id):
+    item = load_prediction(prediction_id)
+    if item is None:
+        flash("That result was not found.", "error")
+        return redirect(url_for("history"))
+    pdf = build_report(item, session["email"], session.get("tz"))
+    local_date = to_local(item["created_at"], session.get("tz")).strftime("%Y-%m-%d")
+    filename = f"CardioSense_Report_{report_id(item)}_{local_date}.pdf"
+    return Response(pdf, mimetype="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 @app.route("/history")

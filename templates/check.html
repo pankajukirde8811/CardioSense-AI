@@ -66,11 +66,16 @@
     <aside class="side">
       <section class="panel">
         <h2>Or upload a blood report</h2>
-        <div class="dropzone is-disabled">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg>
-          <strong>PDF or photo of a lab report</strong>
-          <span class="muted small">Coming in the next step: we read the values (OCR), you check them, then we predict.</span>
-        </div>
+        <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" class="upload-form">
+          <label class="dropzone">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg>
+            <strong id="file-name">Choose a PDF or photo</strong>
+            <span class="muted small">We read the values (OCR). You check them before we predict. The file is deleted right after reading.</span>
+            <input type="file" name="report" accept=".pdf,.png,.jpg,.jpeg,.webp,image/*" class="visually-hidden"
+                   onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Choose a PDF or photo'">
+          </label>
+          <button type="submit" class="btn btn-outline btn-block">Upload &amp; read report</button>
+        </form>
       </section>
       <section class="panel soft">
         <h3>How it works</h3>

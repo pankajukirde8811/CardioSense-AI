@@ -14,7 +14,7 @@
         {% for r in rows %}
           {% set level = {'Low': 'low', 'Moderate': 'moderate', 'Moderate–High': 'modhigh', 'High': 'high'}[r.label] %}
           <tr>
-            <td>{{ r.created_at[:16] }}</td>
+            <td>{{ r.created_at|local_dt }}</td>
             <td>{{ 'Manual entry' if r.source == 'manual' else 'Blood report' }}</td>
             <td><span class="level-text level-{{ level }}">{{ '%.0f' % r.risk }}% {{ r.label }}</span></td>
             <td><a href="{{ url_for('result', prediction_id=r.id) }}">View</a></td>
