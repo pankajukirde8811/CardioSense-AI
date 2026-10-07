@@ -8,6 +8,7 @@
       <span>CardioSense <em>AI</em></span>
     </a>
     <nav>
+      <button type="button" class="install-app link-btn" hidden onclick="installApp()">Install app</button>
       <a href="{{ url_for('check') }}" class="{% if active == 'check' %}current{% endif %}">Check risk</a>
       <a href="{{ url_for('history') }}" class="{% if active == 'history' %}current{% endif %}">History</a>
       <a href="{{ url_for('logout') }}">Log out</a>

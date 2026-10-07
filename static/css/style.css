@@ -153,3 +153,7 @@ h1 { font-family: Sora, sans-serif; font-weight: 600; }
 .form-grid label.missing input { border: 2px solid #E8A3A3; }
 .confirm-check { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-weight: 500; }
 .confirm-check input { width: 20px; height: 20px; accent-color: var(--red); }
+.link-btn { background: none; border: 0; padding: 0 0 4px; font: inherit; font-weight: 600; color: var(--red); cursor: pointer; }
+.link-btn:hover { color: var(--red-dark); }
+.install-app[hidden] { display: none; }
+@media (display-mode: standalone) { .install-app { display: none !important; } }

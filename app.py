@@ -9,7 +9,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import (Flask, Response, flash, g, redirect, render_template,
-                   request, session, url_for)
+                   request, send_from_directory, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from utils.predict import predict_risk
@@ -88,6 +88,19 @@ def login_required(view):
 @app.route("/")
 def index():
     return redirect(url_for("check") if "user_id" in session else url_for("login"))
+
+
+@app.route("/sw.js")
+def service_worker():
+    """Served from the root so it can control the whole app."""
+    response = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
+@app.route("/offline")
+def offline():
+    return render_template("offline.html")
 
 
 @app.route("/login", methods=["GET", "POST"])

@@ -4,11 +4,40 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}CardioSense AI{% endblock %}</title>
+  <meta name="theme-color" content="#B91C1C">
+  <meta name="description" content="Check your heart-disease risk from your health details or a blood report.">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CardioSense">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   {% block body %}{% endblock %}
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));
+    }
+    // Show our own "Install app" button when the browser allows installing.
+    let installPrompt = null;
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPrompt = event;
+      document.querySelectorAll(".install-app").forEach((btn) => (btn.hidden = false));
+    });
+    window.addEventListener("appinstalled", () => {
+      document.querySelectorAll(".install-app").forEach((btn) => (btn.hidden = true));
+    });
+    function installApp() {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      installPrompt.userChoice.finally(() => (installPrompt = null));
+    }
+  </script>
 </body>
 </html>
